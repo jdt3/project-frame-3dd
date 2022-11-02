@@ -1,0 +1,39 @@
+rm(list=ls())
+file <- readLines("example1.3dd")
+setwd("C:/Users/janu/Downloads/assignment 1 SE Model")
+getwd()
+file <- readLines("example1.3dd")
+x_variation <- seq(0.1, 2, 0.1)
+for (delta_x in x_variation)
+{
+  # variation of the length of the frame
+  new_x <- 6.0 + delta_x
+  new_node_3 <- paste0("3", new_x, "3.0  0.0  0.0")
+  new_node_4 <- paste0("4", new_x, "0.0  0.0  0.0")
+  file[9]  <- new_node_3
+  file[10] <- new_node_4
+  #write the new file
+  new_file_name <- paste0("frame3dd_case", delta_x, ".3dd")
+  writeLines(file, new_file_name)
+  # calculate the new system by call the frame3dd executable,make sure that
+  # executable is in the same folder as script
+  system_command <- paste0("frame3dd.exe", new_file_name, " ", new_file_name, ".out")
+  res <- system(system_command, ignore.stdout = TRUE, ignore.stderr = TRUE)
+  }
+x_displacements <- c()
+#evaluate results by reading them in the above set up list
+for (delta_x in x_variation)
+{
+  file_name <- paste0("frame3dd_case", delta_x, ".3dd.out")
+  results <- readLines(file_name)
+  #collect y displacements at node 2
+  node2 <- results[50]
+  node2_split <- strsplit(node2, " ")[[1]]
+  x_disp_string <- node2_split[10]
+  x_disp <- as.numeric(x_disp_string)
+  x_displacements <- append(x_displacements, x_disp)
+}
+#display the results
+print(x_displacements)
+plot(x_variation, x_displacements, xlab = "change in length", ylab = "x displacement", type="l")
+  
